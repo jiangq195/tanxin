@@ -36,7 +36,7 @@ def get_fb(num):
                       [1, 0]])
         base_matrix = np.array([[1],
                                 [1]])
-        # 对A求奇异值分解
+        # 对A求特征值分解
         lamda, Q = np.linalg.eig(A)
 
         # 构建对角矩阵
