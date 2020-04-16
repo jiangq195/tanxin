@@ -109,6 +109,7 @@ def get_best_segment(segments):
     #
     # return segments
 
+# 创建有向图
 def create_graph(input_str):
     list_input = list(input_str)
     len_list_input = len(list_input)

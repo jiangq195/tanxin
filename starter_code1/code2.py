@@ -167,12 +167,13 @@ def top5results(input_q):
 
     pq_rank = sorted(pq.queue, reverse=True, key=lambda x: x[0])
     top_idxs = [x[1] for x in pq_rank]  # top_idxs存放相似度最高的(存在qlist里的)问题的下表
-                                        # hint: 利用priority queue来找top results
+    # hint: 利用priority queue来找top results
 
     return [alist[i] for i in top_idxs]  # 返回相似度最高的问题对应的答案，作为TOP5答案
 
+
 # TODO: 编写几个测试用例，并输出结果
-print(top5results("Which airport was shut down?"))    # 在问题库中存在，经过对比，返回的首结果正确
+print(top5results("Which airport was shut down?"))  # 在问题库中存在，经过对比，返回的首结果正确
 print(top5results("Which airport is closed?"))
 print(top5results("What government blocked aid after Cyclone Nargis?"))
 print(top5results("Which government stopped aid after Hurricane Nargis?"))
@@ -204,9 +205,8 @@ def top5results_invidx(input_q):
     candidates = set()
     for word in seg:
         # 取所有包含任意一个词的文档的并集
-        candidates = candidates | inverted_idx[word]
+        candidates = candidates.union(list(inverted_idx[word]))
     candidates = list(candidates)
-
 
     q_vector = vectorizer.transform([' '.join(seg)])
     # 计算余弦相似度，tfidf用的l2范数，所以分母为1；矩阵乘法
@@ -226,12 +226,88 @@ def top5results_invidx(input_q):
 
 
 # TODO: 编写几个测试用例，并输出结果
-print(top5results_invidx("Which airport was shut down?"))    # 在问题库中存在，经过对比，返回的首结果正确
+print(top5results_invidx("Which airport was shut down?"))  # 在问题库中存在，经过对比，返回的首结果正确
 print(top5results_invidx("Which airport is closed?"))
 print(top5results_invidx("What government blocked aid after Cyclone Nargis?"))
 print(top5results_invidx("Which government stopped aid after Hurricane Nargis?"))
 
+# TODO
+# 读取每一个单词的嵌入。这个是 D*H的矩阵，这里的D是词典库的大小， H是词向量的大小。 这里面我们给定的每个单词的词向量，那句子向量怎么表达？
+# 其中，最简单的方式 句子向量 = 词向量的平均（出现在问句里的）， 如果给定的词没有出现在词典库里，则忽略掉这个词。
+
+from gensim.models import KeyedVectors
+from gensim.scripts.glove2word2vec import glove2word2vec
+import numpy as np
+
+# 将Glove转化为word2vec
+_ = glove2word2vec('./data/glove.6B.100d.txt', './data/glove2word2vec.6B.100d.txt')
+model = KeyedVectors.load_word2vec_format('./data/glove2word2vec.6B.100d.txt')
 
 
+def docvec_get(seg):
+    """
+    将分词数据转为句向量。
+    seg: 分词后的数据
+
+    return: 句向量
+    """
+    vector = np.zeros((1, 100))
+    size = len(seg)
+    for word in seg:
+        try:
+            vector += model.wv[word]
+        except KeyError:
+            size -= 1
+    try:
+        res = vector / size
+    except Exception as e:
+        return e
+    return res
+
+
+X = np.zeros((len(qlist_seg), 100))
+for cur in range(X.shape[0]):
+    X[cur] = docvec_get(qlist_seg[cur])
+
+# 计算X每一行的L2范数
+Xnorm2 = np.linalg.norm(X, axis=1, keepdims=True)
+X = X / Xnorm2
+
+
+def top5result_emb(input_q):
+    """
+    给定用户输入的问题 input_q, 返回最有可能的TOP 5问题。这里面需要做到以下几点：
+    1. 利用倒排表来筛选 candidate
+    2. 对于用户的输入 input_q，转换成句子向量
+    3. 计算跟每个库里的问题之间的相似度
+    4. 找出相似度最高的top5问题的答案
+    """
+    seg = text_preprocessing(input_q)
+    candidate = set()
+    for word in seg:
+        candidate = candidate.union(list(inverted_idx[word]))
+    candidate = list(candidate)
+    # 将用户输入的seg(input_q)转换为句子向量
+    input_vec = docvec_get(seg)
+    q_norm = np.linalg.norm(input_vec, axis=1, keepdims=True)
+    input_vec = input_vec / q_norm
+    sim = np.dot(X[candidate], input_vec.T).tolist()
+    pq = PriorityQueue()
+    for i in range(len(sim)):
+        pq.put([sim[i], candidate[i]])
+        if len(pq.queue) > 5:
+            pq.get()
+    pq_sort = sorted(pq.queue, reverse=True, key=lambda x: x[0])
+    print([x[0] for x in pq_sort])
+    top_alist = [alist[li[1]] for li in pq_sort]
+
+    return top_alist
+
+
+print('<--------glove词向量法--------->')
+print(top5result_emb("Which airport was shut down?"))  # 在问题库中存在，经过对比，返回的首结果正确
+print(top5result_emb("Which airport is closed?"))
+print(top5result_emb("What government blocked aid after Cyclone Nargis?"))
+print(top5result_emb("Which government stopped aid after Hurricane Nargis?"))
 
 plt.show()
