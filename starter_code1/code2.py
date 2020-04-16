@@ -177,6 +177,59 @@ print(top5results("Which airport is closed?"))
 print(top5results("What government blocked aid after Cyclone Nargis?"))
 print(top5results("Which government stopped aid after Hurricane Nargis?"))
 
+# TODO: 基于倒排表的优化。在这里，我们可以定义一个类似于hash_map, 比如 inverted_index = {}， 然后存放包含每一个关键词的文档出现在了什么位置，
+#       也就是，通过关键词的搜索首先来判断包含这些关键词的文档（比如出现至少一个），然后对于candidates问题做相似度比较。
+#
+
+from collections import defaultdict
+
+inverted_idx = defaultdict(set)  # 制定一个一个简单的倒排表
+for cur in range(len(qlist_seg)):
+    for word in qlist_seg[cur]:
+        inverted_idx[word].add(cur)
+
+
+#         if cur < 5:
+#             print(inverted_idx)  # 看一下倒排表的效果
+
+def top5results_invidx(input_q):
+    """
+    给定用户输入的问题 input_q, 返回最有可能的TOP 5问题。这里面需要做到以下几点：
+    1. 利用倒排表来筛选 candidate
+    2. 对于用户的输入 input_q 首先做一系列的预处理，然后再转换成tf-idf向量（利用上面的vectorizer)
+    3. 计算跟每个库里的问题之间的相似度
+    4. 找出相似度最高的top5问题的答案
+    """
+    seg = text_preprocessing(input_q)
+    candidates = set()
+    for word in seg:
+        # 取所有包含任意一个词的文档的并集
+        candidates = candidates | inverted_idx[word]
+    candidates = list(candidates)
+
+
+    q_vector = vectorizer.transform([' '.join(seg)])
+    # 计算余弦相似度，tfidf用的l2范数，所以分母为1；矩阵乘法
+    sim = (X[candidates] * q_vector.T).toarray()
+
+    # 使用优先队列找出top5
+    pq = PriorityQueue()
+    for cur in range(sim.shape[0]):
+        pq.put((sim[cur][0], candidates[cur]))
+        if len(pq.queue) > 5:
+            pq.get()
+
+    pq_rank = sorted(pq.queue, reverse=True, key=lambda x: x[0])
+    top_alist = [alist[x[1]] for x in pq_rank]  # 返回相似度最高的问题对应的答案，作为TOP5答案
+
+    return top_alist
+
+
+# TODO: 编写几个测试用例，并输出结果
+print(top5results_invidx("Which airport was shut down?"))    # 在问题库中存在，经过对比，返回的首结果正确
+print(top5results_invidx("Which airport is closed?"))
+print(top5results_invidx("What government blocked aid after Cyclone Nargis?"))
+print(top5results_invidx("Which government stopped aid after Hurricane Nargis?"))
 
 
 
