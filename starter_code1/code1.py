@@ -64,7 +64,7 @@ def segment_recur(input_str, max_len_word=16):
 
         if word in dic_words:
             seg_ments = segment_recur(input_str[idx:])
-            if (len(seg_ments) == 0) & (len(input_str[max_split:]) == 0):
+            if len(input_str[idx:]) == 0:
                 segments.append([word])
             else:
                 for item in seg_ments:
@@ -241,9 +241,9 @@ def word_segment_viterbi(input_str):
 EPSILON = 1e-10
 segments =segment_recur("北京的天气真好啊")
 print(segments)
-print(get_best_segment(segments))
-print(create_graph("北京的天气真好啊"))
-print(word_segment_viterbi("北京的天气真好啊"))
+# print(get_best_segment(segments))
+# print(create_graph("北京的天气真好啊"))
+# print(word_segment_viterbi("北京的天气真好啊"))
 # print(word_segment_naive("北京的天气真好啊"))
 # print(word_segment_naive("今天的课程内容很有意思"))
 # print(word_segment_naive("经常有意见分歧"))
