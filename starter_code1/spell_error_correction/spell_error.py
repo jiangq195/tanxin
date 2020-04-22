@@ -63,8 +63,8 @@ corpus = reuters.sents(categories=categories)
 term_count = {}
 bigram_count = {}
 for doc in corpus:
-    doc = ['<s>'] + doc
-    for i in range(len(doc) - 1):
+    doc = ['<s>'] + doc + ['<p>']
+    for i in range(len(doc)):
         # bigram
         term = doc[i]
         bigram = doc[i: i+2]
@@ -79,7 +79,7 @@ for doc in corpus:
         else:
             bigram_count[bigram] = 1
 
-    print(bigram_count)
+
 
 # sklearn有现成的包
 
@@ -101,12 +101,16 @@ V = len(term_count.keys())
 file = open('../data/testdata.txt', 'r')
 for line in file:
     items = line.rstrip().split('\t')
-    line = items[2].split()
-    for word in line:
+    line = ['<s>'] + [spl.rstrip(',|.|?') for spl in items[2].split()] + ['<p>']
+    for index in range(1, len(line)-1):
+        word = line[index]
         if word not in vocab:
             # 需要替换word成正确的单词
             # Step1:生成所有的(valid)候选集合
             candidates = generate_candidate(word)
+            # if candidate == [], 生成编辑距离为2的candidate
+            if len(candidates) < 1:
+                continue  # 不建议
 
             probs = []
             # 对于每一个candidate，计算它的score
@@ -123,17 +127,26 @@ for line in file:
 
                 # b.计算语言模型概率
                 idx = line.index(word)
-                if line[idx-1] + candi in bigram_count:
-                    prob += np.log((bigram_count[items[2][idx-1]][candi] + 1.0) / (
-                        term_count[bigram_count[items[2][idx-1]]] + V
-                    ))
+                if line[idx-1] not in term_count:
+                    prob += np.log(1.0 / V)
+                elif line[idx-1] + ' ' + candi in bigram_count:
+                    prob += np.log((bigram_count[line[idx-1] + ' ' + candi] + 1.0) / (term_count[line[idx-1]] + V))
+                else:
+                    prob += np.log(1.0/(term_count[line[idx-1]] + V))
 
                 # TODO：也要考虑当前[word, post_word]
                 # prob += np.log(bigram概率)
-                else:
+                if word not in term_count:
                     prob += np.log(1.0 / V)
+                elif candi + ' ' + line[idx + 1] in bigram_count:
+                    prob += np.log((bigram_count[candi + ' ' + line[idx + 1]] + 1.0) / (term_count[candi] + V))
+                else:
+                    prob += np.log(1.0/(term_count[candi] + V))
 
                 probs.append(prob)
+            max_idx = probs.index(max(probs))
+            print(word, candidates[max_idx])
+
 
 
 
