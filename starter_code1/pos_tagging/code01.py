@@ -19,16 +19,16 @@ M = len(word2id)  # M:词典的大小
 N = len(tag2id)  # N:词性的种类个数
 
 pi = np.zeros(N)  # 每个词性出现在句子中第一个位置的概率
-A = np.np.zeros((N, M))  # 给定tag i，出现单词j的概率
+A = np.zeros((N, M))  # 给定tag i，出现单词j的概率
 B = np.zeros((N, N))  # 之前的状态是i，之后转换成状态j的概率
 
 prev_tag = ""
 for line in open('./traindata.txt'):
     items = line.split('/')
     wordId, tagId = word2id[items[0]], tag2id[items[1].rstrip()]
-    A[tagId][word2id] += 1
+    A[tagId][wordId] += 1
     if prev_tag == "":  # 这意味着是句子的开始
-        pi[tag2id] += 1
+        pi[tagId] += 1
     else:
         B[tag2id[prev_tag]][tagId] += 1
 
@@ -75,5 +75,24 @@ def viterbi(x, pi, A, B):
             # TODO: 一下几行代码可以写成一行(vectorize的操作,会使得效率更高)
             dp[i][j] = -9999999
             for k in range(N):  # 从每一个k可以到达j
-                score =
+                score = dp[i - 1][k] + log(B[k][j]) + log(A[j][x[i]])
+                if score > dp[i][j]:
+                    dp[i][j] = score
+                    ptr[i][j] = k
 
+    # decoding:把最好的sequence打印出来
+    best_seq = [0] * T
+    # 找出最后一个单词的词性id
+    best_seq[T - 1] = np.argmax(dp[T - 1])
+
+    # 从后向前依次找出每个单词的词性id
+    for i in range(T - 2, -1, -1):
+        best_seq[i] = ptr[i + 1][best_seq[i + 1]]
+
+    # 到目前为止，best_seq存放了对应于x的词性序列
+    for i in range(len(best_seq)):
+        print(id2tag[best_seq[i]])
+
+
+x = "Social Security number , passport number and details about the services provided for the payment"
+viterbi(x, pi, A, B)
