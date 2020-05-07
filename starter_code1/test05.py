@@ -16,6 +16,12 @@ def compressString(S):
             head = tail
 
 
+# res = compressString("aabcccccaa")
+# print(res)
 
-res = compressString("aabcccccaa")
-print(res)
+# a = []
+# a.push(1)
+# print(a)
+
+a = [0, 1, 2, 3]
+print(a.index(2))
