@@ -17,6 +17,7 @@ def main_extract(input_str, stop_word, d_4_delete, d_city_province):
 def city_prov_ahead(seg, d_ciy_province):
     city_prov_list = []
     a = 1
+    b = 2
 
     return
 
