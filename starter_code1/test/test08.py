@@ -80,4 +80,4 @@ def verifyPostorder(postorder):
 
 
 print(verifyPostorder([1, 2, 5, 10, 6, 9, 4, 3]))
->>>>>>> 8c118ce3c881f1ef2324eb4116cf8496d2f95b7e
+
