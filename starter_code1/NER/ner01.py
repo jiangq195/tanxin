@@ -18,6 +18,7 @@ def city_prov_ahead(seg, d_ciy_province):
     city_prov_list = []
     a = 1
     b = 2
+    c = 3
 
     return
 
