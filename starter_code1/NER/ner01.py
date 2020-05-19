@@ -16,6 +16,7 @@ def main_extract(input_str, stop_word, d_4_delete, d_city_province):
 # 实现公司名称中地名提前
 def city_prov_ahead(seg, d_ciy_province):
     city_prov_list = []
+    a = 1
 
     return
 
