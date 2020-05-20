@@ -9,25 +9,37 @@ def main_extract(input_str, stop_word, d_4_delete, d_city_province):
     # 开始分词并处理
     seg = pseg.cut(input_str)
     seg_list = remove_word(seg, stop_word, d_4_delete)
-    seg_list = city_prov_ahead(seg, d_city_province)
+    seg_list = city_prov_ahead(seg_list, d_city_province)
     return seg_list
 
 
 # 实现公司名称中地名提前
-def city_prov_ahead(seg, d_ciy_province):
+def city_prov_ahead(seg, d_city_province):
     city_prov_list = []
     a = 1
     b = 2
     c = 3
 
-    return
+    seg_list = []
+    for word in seg:
+        if word in d_city_province:
+            city_prov_list.append(word)
+        else:
+            seg_list.append(word)
+
+
+    return city_prov_list + seg_list
 
 
 # 替换特殊字符
 def remove_word(seg, stop_word, d_4_delete):
     # TODO
+    seg_list = []
+    for word, _ in seg:
+        if (word not in stop_word) and (word not in d_4_delete):
+            seg_list.append(word)
 
-    return
+    return seg_list
 
 
 # 初始化， 加载词典

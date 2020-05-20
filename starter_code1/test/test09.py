@@ -1,3 +1,8 @@
+import random
+
+y_list = [0, 1, 2, 3]
+res = random.choices(y_list)
+
 def searchMatrix(matrix, target):
     i, j = len(matrix) - 1, 0
     result = False
