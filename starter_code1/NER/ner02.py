@@ -28,13 +28,13 @@ for i in range(len(test_data)):
             company_main_name = ''.join(lst)  # 对公司名提取主体部分，将包含相同主体部分的公司统一为一个实体
             if company_main_name not in ner_dict_new:
                 ner_dict_new[company_main_name] = ner_id
+                ner_dict_reverse_new[ner_id] = company_main_name
                 ner_id += 1
 
             sentence = sentence[:start] + ' ner_' + str(ner_dict_new[company_main_name]) + '_ ' + sentence[end:]
 
     test_data.iloc[i, -1] = sentence
 
-# ner_dict_reverse_new = {idx: name for name, idx in ner_dict_new}
 
 X_test = test_data[['ner']]
 
@@ -57,6 +57,7 @@ for i in range(len(train_data)):
                     main_extract(ner_name, stop_word, d_4_delete, d_city_province))  # 提取公司主体名称
                 if company_main_name not in ner_dict_new:
                     ner_dict_new[company_main_name] = ner_id
+                    ner_dict_reverse_new[ner_id] = company_main_name
                     ner_id += 1
 
                 # 在句子中用编号替换实体名
@@ -73,6 +74,7 @@ for i in range(len(train_data)):
                 main_extract(company_main_name, stop_word, d_4_delete, d_city_province))  # 提取公司主体名称
             if company_main_name not in ner_dict_new:
                 ner_dict_new[company_main_name] = ner_id
+                ner_dict_reverse_new[ner_id] = company_main_name
                 ner_id += 1
 
             # 在句子中用编号替换实体名

@@ -69,6 +69,7 @@ def my_initial():
 
 d_4_delete, stop_word, d_city_province = my_initial()
 # company_name = "河北银行股份有限公司"
-# lst = main_extract(company_name, stop_word, d_4_delete, d_city_province)
-# company_name = ''.join(lst)  # 对公司名提取主体部分，将包含相同主体部分的公司统一为一个实体
-# print(company_name)
+company_name = "烟台新潮实业股份有限公司"
+lst = main_extract(company_name, stop_word, d_4_delete, d_city_province)
+company_name = ''.join(lst)  # 对公司名提取主体部分，将包含相同主体部分的公司统一为一个实体
+print(company_name)
