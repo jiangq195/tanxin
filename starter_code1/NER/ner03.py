@@ -1,7 +1,7 @@
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.feature_extraction.text import CountVectorizer
 
-# from pyltp
+from pyltp import Segmentor
 
 # 实体符号加入分词词典
 with open('../data/user_dict.txt', 'w') as fw:
