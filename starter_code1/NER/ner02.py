@@ -88,4 +88,5 @@ X_train = train_data[['ner']]
 
 # 将train和test放在一起提取特征
 X = pd.concat([X_train, X_test])
+X.to_csv('./x.csv', index=False)
 print(X)
