@@ -14,8 +14,8 @@ with open('../data/user_dict.txt', 'w', encoding='utf-8') as fw:
 # 初始化实例
 segmentor = Segmentor()
 # 加载模型,加载自定义词典
-# segmentor.load_with_lexicon('F:\ltp_data\cws.model', '../data/user_dict.txt')
-segmentor.load_with_lexicon('E:\ltp_data\cws.model', '../data/user_dict.txt')
+segmentor.load_with_lexicon('F:\ltp_data\cws.model', '../data/user_dict.txt')
+# segmentor.load_with_lexicon('E:\ltp_data\cws.model', '../data/user_dict.txt')
 
 # 加载停用词
 fr = open(r'../data/dict/stopwords.txt', encoding='utf-8')
@@ -38,8 +38,8 @@ tfidf_train = tfidf.transform(corpus)
 tfidf_feature = pd.DataFrame(tfidf_train.toarray())
 
 postagger = Postagger()  # 初始化实例
-# postagger.load_with_lexicon('F:\ltp_data\pos.model', '../data/user_dict.txt')  # 加载模型
-postagger.load_with_lexicon('E:\ltp_data\pos.model', '../data/user_dict.txt')  # 加载模型
+postagger.load_with_lexicon('F:\ltp_data\pos.model', '../data/user_dict.txt')  # 加载模型
+# postagger.load_with_lexicon('E:\ltp_data\pos.model', '../data/user_dict.txt')  # 加载模型
 
 
 def parse(s):
@@ -65,13 +65,15 @@ def parse(s):
     words = segmentor.segment(s)
     tags = postagger.postag(words)
     parser = Parser()  # 初始化实例
-    # parser.load('F:\ltp_data\parser.model')  # 加载模型
-    parser.load('E:\ltp_data\parser.model')  # 加载模型
+    parser.load('F:\ltp_data\parser.model')  # 加载模型
+    # parser.load('E:\ltp_data\parser.model')  # 加载模型
     arcs = parser.parse(words, tags)  # 句法分析
     arcs_lst = list(map(list, zip(*[[arc.head, arc.relation] for arc in arcs])))
 
     # 句法分析结果输出
-    parse_result = pd.DataFrame([[a, b, c, d] for a, b, c, d in zip(list(words), list(tags), arcs_lst[0], arcs_lst[1])],
+    # parse_result = pd.DataFrame([[a, b, c, d] for a, b, c, d in zip(list(words), list(tags), arcs_lst[0], arcs_lst[1])],
+    #                             index=range(1, len(words) + 1))
+    parse_result = pd.DataFrame(list(map(list, zip(list(words), list(tags), arcs_lst[0], arcs_lst[1]))),
                                 index=range(1, len(words) + 1))
     parser.release()
 
