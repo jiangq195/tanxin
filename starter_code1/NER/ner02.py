@@ -35,7 +35,6 @@ for i in range(len(test_data)):
 
     test_data.iloc[i, -1] = sentence
 
-
 X_test = test_data[['ner']]
 
 # 处理train数据,利用开源工具进行实体识别和并使用实体统一函数储存实体
@@ -87,6 +86,28 @@ train_num = len(train_data)
 X_train = train_data[['ner']]
 
 # 将train和test放在一起提取特征
-X = pd.concat([X_train, X_test])
-X.to_csv('./x.csv', index=False)
-print(X)
+# X = pd.concat([X_train, X_test])
+# X.to_csv('./x.csv', index=False)
+# print(X)
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn import preprocessing
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+import numpy as np
+
+# TODO: 定义需要遍历的参数
+paramaeters = {'C': np.logspace(-3, 3, 7)}
+
+# TODO:选择模型
+lr = LogisticRegression()
+
+# TODO:利用GridSearchCV
+clf = GridSearchCV(lr, paramaeters, cv=5)
+clf.fit(X_train, y)
+
+# TODO:对Test_data进行分类
+predict =clf.predict(X_test)
+predict_prob = clf.predict_proba(X_test)
+print(predict)
+print(predict_prob)
